@@ -54,7 +54,7 @@ fun main() {
     val stakingRepository = StakingRepository()
     var finished = false
 
-    val user = "Alice"
+    val user = "Alice" // TODO
 
     while (!finished) {
         print("Input a token you'd like to stake: ")
@@ -67,8 +67,8 @@ fun main() {
         print("Input amount in ${protocol.token.id}: ")
         val amountIn = readLineDouble()
 
-        // Return if null on NaN
-        if (amountIn == null || amountIn.isNaN() || amountIn <= 0.0) return
+        // Return if null or NaN
+        if (amountIn == null || (amountIn.isNaN() && amountIn <= 0.0)) return
 
         commandProcessor.addToQueue(StakingAddCommand(User("test"), stakeIn, amountIn))
 
@@ -82,23 +82,10 @@ fun main() {
 }
 
 // TODO
-fun populate(stakingRepository: StakingRepository, commandProcessor: CommandProcessor) {
-    val wallet = hashMapOf(
-        TokenType.KSM to 3.0,
-        TokenType.DOT to 25.0,
-        TokenType.ETH to 1.0
-    )
-
-    val alice = User("Alice", wallet)
-    val bob = User("Bob", wallet)
-    val charlie = User("Charlie", wallet)
-
-    commandProcessor
-        .addToQueue(StakingAddCommand(alice, TokenType.KSM, amount = 3.0))
-        .addToQueue(StakingAddCommand(bob, TokenType.ETH, amount = 3.06))
-        .addToQueue(StakingAddCommand(charlie, TokenType.DOT, amount = 25.0))
+fun populateCommands() {
 }
 
 // TODO
-fun populateCommands() {
+fun populateStore() {
+
 }

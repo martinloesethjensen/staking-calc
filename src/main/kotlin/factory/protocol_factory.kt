@@ -10,6 +10,7 @@ sealed class TokenType {
     object UNKNOWN : TokenType()
 }
 
+// Factory for
 object ProtocolFactory {
     fun protocolFromToken(tokenType: TokenType): Protocol = when (tokenType) {
         TokenType.DOT -> Protocol("Polkadot", Token("DOT", 5.0))

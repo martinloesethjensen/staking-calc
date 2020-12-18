@@ -4,6 +4,8 @@ import factory.TokenType
 
 typealias Price = Double
 typealias Amount = Double
+typealias RewardAmount = Double
+typealias WalletItem = Map<TokenType, Amount>
 
 data class User(val name: String, var wallet: HashMap<TokenType, Amount> = hashMapOf())
 
@@ -14,6 +16,7 @@ data class Token(val id: String, val price: Price) {
     }
 }
 
+// Contains information about the protocol/project
 data class Protocol(val name: String, val token: Token) {
     companion object {
         @JvmStatic
