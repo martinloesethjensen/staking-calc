@@ -1,7 +1,11 @@
 package store
 
 import factory.TokenType
-import models.*
+import models.Amount
+import models.NonExistingUser
+import models.Price
+import models.Rewards
+import models.User
 
 class StakingStore {
     private val store = HashMap<String, Price>()

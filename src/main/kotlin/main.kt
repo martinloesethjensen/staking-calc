@@ -1,7 +1,5 @@
 import factory.ProtocolFactory
 import factory.TokenType
-import models.Amount
-import models.Token
 import models.User
 import store.StakingRepository
 import utils.isNullOrUnknown
@@ -58,8 +56,6 @@ fun main() {
 
     val user = "Alice"
 
-
-
     while (!finished) {
         print("Input a token you'd like to stake: ")
         val stakeIn = readLine()?.toTokenType()
@@ -105,5 +101,4 @@ fun populate(stakingRepository: StakingRepository, commandProcessor: CommandProc
 
 // TODO
 fun populateCommands() {
-
 }
