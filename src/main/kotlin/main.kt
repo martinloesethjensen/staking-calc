@@ -1,7 +1,10 @@
 import factory.ProtocolFactory
 import factory.TokenType
+import models.Amount
+import models.Token
 import models.User
 import store.StakingRepository
+import utils.isNullOrUnknown
 import utils.readLineDouble
 import utils.shouldContinue
 import utils.toTokenType
@@ -11,7 +14,8 @@ interface StakingCommand {
     fun execute()
 }
 
-class StakingAddCommand(private val user: User, private val tokenType: TokenType, private val amount: Double) : StakingCommand {
+class StakingAddCommand(private val user: User, private val tokenType: TokenType, private val amount: Double) :
+    StakingCommand {
     override fun execute() {
         val protocol = ProtocolFactory.protocolFromToken(tokenType)
         val token = protocol.token
@@ -23,7 +27,7 @@ class StakingAddCommand(private val user: User, private val tokenType: TokenType
 
 /**
  * Redeems staking rewards for a chosen token.
- * It will look in the store if user
+ * It will look in the store if user has redeemable tokens
  */
 class StakingRedeemCommand(private val user: User, private val tokenType: TokenType) : StakingCommand {
     override fun execute() {
@@ -70,7 +74,7 @@ fun main() {
         // Return if null on NaN
         if (amountIn == null || amountIn.isNaN() || amountIn <= 0.0) return
 
-        commandProcessor.addToQueue(StakingAddCommand(user, stakeIn, amountIn))
+        commandProcessor.addToQueue(StakingAddCommand(User("test"), stakeIn, amountIn))
 
         print("Want to stake more assets? y/n: ")
         val input = readLine()
@@ -83,12 +87,20 @@ fun main() {
 
 // TODO
 fun populate(stakingRepository: StakingRepository, commandProcessor: CommandProcessor) {
+    val wallet = hashMapOf(
+        TokenType.KSM to 3.0,
+        TokenType.DOT to 25.0,
+        TokenType.ETH to 1.0
+    )
 
+    val alice = User("Alice", wallet)
+    val bob = User("Bob", wallet)
+    val charlie = User("Charlie", wallet)
 
     commandProcessor
-        .addToQueue(StakingAddCommand(User("Alice"), TokenType.KSM, amount = 3.0))
-        .addToQueue(StakingAddCommand("Bob", TokenType.ETH, amount = 3.06))
-        .addToQueue(StakingAddCommand("", TokenType.DOT, amount = 25.0))
+        .addToQueue(StakingAddCommand(alice, TokenType.KSM, amount = 3.0))
+        .addToQueue(StakingAddCommand(bob, TokenType.ETH, amount = 3.06))
+        .addToQueue(StakingAddCommand(charlie, TokenType.DOT, amount = 25.0))
 }
 
 // TODO

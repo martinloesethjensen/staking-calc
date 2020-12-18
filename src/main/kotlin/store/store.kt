@@ -1,15 +1,15 @@
 package store
 
-import TokenType
+import factory.TokenType
 import models.*
 
 class StakingStore {
     private val store = HashMap<String, Price>()
 
     // Imitate a user base for the "authentication"
-    private val userStore = mutableListOf("user1", "hodler", "buidler")
+    private val userStore = mutableListOf("Alice", "Bob", "Charlie")
 
-    fun authenticate(user: User) = userStore.contains(user)
+    fun authenticate(user: User) = userStore.contains(user.name)
 
     fun addFundsToStake(token: TokenType, amount: Amount) {
         when (token) {
@@ -34,6 +34,7 @@ class StakingStore {
 class StakingRepository {
     private val store = StakingStore()
 
+    // TODO
     fun stake(user: User, token: TokenType, amount: Double) {
         if (store.authenticate(user)) {
             store.addFundsToStake(token, amount)
@@ -41,6 +42,7 @@ class StakingRepository {
         } else throw NonExistingUser("User does not exist")
     }
 
+    // TODO
     fun redeem(user: User, token: TokenType): Rewards {
         if (store.authenticate(user)) {
             return store.getRewards(token)

@@ -1,6 +1,6 @@
 package utils
 
-import TokenType
+import factory.TokenType
 
 fun String.toTokenType(): TokenType = when (this.toLowerCase()) {
     TokenType.DOT.toSimpleName() -> TokenType.DOT
