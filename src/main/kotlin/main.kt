@@ -1,6 +1,7 @@
 import commands.CommandProcessor
 import commands.StakingAddCommand
 import factories.ProtocolFactory
+import models.TokenType
 import models.User
 import store.StakingRepository
 import utils.*
@@ -35,6 +36,8 @@ fun main() {
     }
 
     UserSession.login(user)
+
+    stakingRepository.claimRewards(user, TokenType.DOT)
 
     """
         |-------------------------------

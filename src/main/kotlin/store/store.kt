@@ -16,9 +16,10 @@ class StakingStore {
     // Imitate a user base for the "authentication"
     private val userStore = mutableListOf(alice, bob, charlie)
 
-    fun authenticate(user: User) = userStore.contains(user)
+    fun User.authenticate() = userStore.contains(this)
 
     fun addFundsToStake(user: User, token: TokenType, amount: Amount) {
+        if (!user.authenticate()) throw NonExistingUser("User does not exist")
         if (amount.isNaN()) throw NumberFormatException()
 
         // Check if the user has the token that the user wants to stake
@@ -31,6 +32,9 @@ class StakingStore {
                 "User has ${user.fundsFromToken(token)} in funds, " +
                         "but amount was: $amount"
             )
+
+        if (token.isNullOrUnknown()) throw UnknownToken("Token is unknown!")
+
 
         // Using factory to get APY for a token
         val apy = APYFactory.apyFromToken(token)
@@ -75,26 +79,29 @@ class StakingStore {
     }
 
     // TODO:
-    // Check if user has rewards
-    fun getRewards(user: User, token: TokenType): Rewards {
-        if (!user.hasRewards(token))
-            throw NoRewards("There's no rewards to redeem for token: ${token.toSimpleName()}")
+    // Adds rewards to user's wallet
+    fun claimRewards(user: User, token: TokenType) {
+        if (!user.authenticate()) throw NonExistingUser("User does not exist")
+        if (!user.hasRewards(token)) throw NoRewards("There's no rewards to redeem for token: ${token.toSimpleName()}")
+        if (token.isNullOrUnknown()) throw UnknownToken("Token is unknown!")
 
-        when (token) {
-            TokenType.DOT -> {
+        // Get the amount in rewards
+        // .first is the staked amount
+        // .second is the rewards to claim
+        val stakedAmount = store[user.name]?.get(token)?.first as Double
+        val rewardsAmount = store[user.name]?.get(token)?.second
 
-            }
-            TokenType.KSM -> TODO()
-            TokenType.ETH -> TODO()
-            TokenType.UNKNOWN -> Rewards.empty
-        }
-        return Rewards.empty
+        // Update store rewards for the user in a token that is staked
+        store[user.name]?.put(token, Pair(stakedAmount, 0.0))
+
+        // Add the claimed rewards to the user's wallet for that token
+        UserSession.updateWalletFunds(token, rewardsAmount)
+
+        println(store)
     }
 
     // Returns true if user has rewards in a token
     private fun User.hasRewards(token: TokenType) = store[this.name]!![token]!!.second >= 0
-
-    fun commit() = println("Completed transaction: $store")
 }
 
 // Facade
@@ -102,18 +109,10 @@ class StakingRepository {
     private val store = StakingStore()
 
     fun stake(user: User, token: TokenType, amount: Double) {
-        if (store.authenticate(user)) {
-            store.addFundsToStake(user, token, amount)
-            store.commit()
-        } else throw NonExistingUser("User does not exist")
+        store.addFundsToStake(user, token, amount)
     }
 
-    // TODO
-    fun redeem(user: User, token: TokenType): Rewards {
-        if (store.authenticate(user)) {
-            return store.getRewards(user, token)
-        } else {
-            throw NonExistingUser("User does not exist")
-        }
+    fun claimRewards(user: User, token: TokenType) {
+        store.claimRewards(user, token)
     }
 }
