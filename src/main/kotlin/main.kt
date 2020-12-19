@@ -1,91 +1,98 @@
-import factory.ProtocolFactory
-import factory.TokenType
+import commands.CommandProcessor
+import commands.StakingAddCommand
+import factories.ProtocolFactory
 import models.User
 import store.StakingRepository
-import utils.isNullOrUnknown
-import utils.readLineDouble
-import utils.shouldContinue
-import utils.toTokenType
+import utils.*
+import kotlin.system.exitProcess
 
-// Command
-interface StakingCommand {
-    fun execute()
-}
-
-class StakingAddCommand(private val user: User, private val tokenType: TokenType, private val amount: Double) :
-    StakingCommand {
-    override fun execute() {
-        val protocol = ProtocolFactory.protocolFromToken(tokenType)
-        val token = protocol.token
-        println("Staking ${protocol.name} (${token.id}) with amount: $amount")
-        println("Current price for 1 ${token.id} is $${token.price}")
-        // todo add logic
-    }
-}
-
-/**
- * Redeems staking rewards for a chosen token.
- * It will look in the store if user has redeemable tokens
- */
-class StakingRedeemCommand(private val user: User, private val tokenType: TokenType) : StakingCommand {
-    override fun execute() {
-        TODO("Not yet implemented: Implement so it uses the store")
-    }
-}
-
-class CommandProcessor {
-
-    private val queue = ArrayList<StakingCommand>()
-
-    fun addToQueue(stakingCommand: StakingCommand): CommandProcessor =
-        apply {
-            queue.add(stakingCommand)
-        }
-
-    fun processCommands(): CommandProcessor =
-        apply {
-            queue.forEach { it.execute() }
-            queue.clear()
-        }
+enum class MenuItem {
+    STAKE, CLAIM, QUIT
 }
 
 fun main() {
     val commandProcessor = CommandProcessor()
     val stakingRepository = StakingRepository()
-    var finished = false
+    var stakeFinished = false
+    var claimFinished = false
 
-    val user = "Alice" // TODO
+    """
+        |-------------------------------
+        |Available users 
+        |Enter one of the options below:
+        |   '1' --> Alice
+        |   '2' --> Bob
+        |   '3' --> Charlie 
+        |Default is Alice
+        |-------------------------------   
+    """.trimMargin().print()
 
-    while (!finished) {
+    val user = when (readLine()) {
+        "1" -> alice
+        "2" -> bob
+        "3" -> charlie
+        else -> alice
+    }
+
+    UserSession.login(user)
+
+    """
+        |-------------------------------
+        |User: ${user.name}
+        |Enter one of the options below:
+        |   '1' --> Stake tokens
+        |   '2' --> Claim rewards
+        |   'q' --> Quit 
+        |Defaults to staking tokens
+        |-------------------------------   
+    """.trimMargin().print()
+
+    val menuItem = when (readLine()?.toLowerCase()) {
+        "1" -> MenuItem.STAKE
+        "2" -> MenuItem.CLAIM
+        "q" -> MenuItem.QUIT
+        else -> MenuItem.STAKE
+    }
+
+    if (menuItem == MenuItem.QUIT) return
+
+    while (menuItem == MenuItem.STAKE && !stakeFinished) {
         print("Input a token you'd like to stake: ")
         val stakeIn = readLine()?.toTokenType()
 
         // Early return --> we don't want to proceed as token is unknown to us
         if (stakeIn.isNullOrUnknown()) return
 
+        // Factory to get the protocol/project info for a token
         val protocol = ProtocolFactory.protocolFromToken(stakeIn!!)
+
         print("Input amount in ${protocol.token.id}: ")
         val amountIn = readLineDouble()
 
         // Return if null or NaN
         if (amountIn == null || (amountIn.isNaN() && amountIn <= 0.0)) return
 
-        commandProcessor.addToQueue(StakingAddCommand(User("test"), stakeIn, amountIn))
+        commandProcessor.addToQueue(StakingAddCommand(user, stakeIn, amountIn))
 
         print("Want to stake more assets? y/n: ")
         val input = readLine()
 
-        if (!input.shouldContinue()) finished = true
+        // Finish loop if user does not want to stake anymore
+        if (!input.shouldContinue()) stakeFinished = true
     }
 
+    while (menuItem == MenuItem.CLAIM && !claimFinished) {
+        TODO("Finish claim/redeem rewards functionality")
+
+        print("Want to claim more rewards? y/n: ")
+        val input = readLine()
+
+        // Finish loop if user does not want to claim anymore rewards
+        if (!input.shouldContinue()) claimFinished = true
+    }
+
+    // Process commands
     commandProcessor.processCommands()
-}
 
-// TODO
-fun populateCommands() {
-}
-
-// TODO
-fun populateStore() {
-
+    UserSession.logout()
 }

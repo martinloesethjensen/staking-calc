@@ -23,6 +23,8 @@ val charlie = User(
         TokenType.ETH to 0.5
     )
 )
+val dave = User("Dave", wallet = hashMapOf())
+val eve = User("Eve", wallet = hashMapOf())
 
 object UserSession {
     var user: User? = null

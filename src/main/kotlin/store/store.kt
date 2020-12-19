@@ -1,7 +1,10 @@
 package store
 
 import UserSession
-import factory.TokenType
+import alice
+import bob
+import charlie
+import factories.APYFactory
 import models.*
 import utils.*
 
@@ -11,9 +14,9 @@ class StakingStore {
     private val store = HashMap<String, HashMap<TokenType, Pair<Amount, RewardAmount>>>()
 
     // Imitate a user base for the "authentication"
-    private val userStore = mutableListOf("Alice", "Bob", "Charlie")
+    private val userStore = mutableListOf(alice, bob, charlie)
 
-    fun authenticate(user: User) = userStore.contains(user.name)
+    fun authenticate(user: User) = userStore.contains(user)
 
     fun addFundsToStake(user: User, token: TokenType, amount: Amount) {
         if (amount.isNaN()) throw NumberFormatException()
@@ -29,20 +32,28 @@ class StakingStore {
                         "but amount was: $amount"
             )
 
-        val apy = when (token) {
-            TokenType.DOT -> DOT_APY
-            TokenType.KSM -> KSM_APY
-            TokenType.ETH -> ETH_APY
-            TokenType.UNKNOWN -> 0.0
+        // Using factory to get APY for a token
+        val apy = APYFactory.apyFromToken(token)
+
+        // This will populate user and user's tokens if they are not present in the store.
+        // It provides default values that can be used for compounding interest
+        val tokenInStore = store
+            .getOrPut(user.name) { hashMapOf(token to Pair(0.0, 0.0)) }
+            .getOrPut(token) { Pair(0.0, 0.0) }
+
+        // When user stakes more assets in a token that is already staked and in store.
+        // Then it should compound the rewards to claim and add it to the amount (.first)
+        val compoundAmount = tokenInStore.let {
+            amount + it.first + it.second
         }
 
         // Put in store
-        store[user.name] = hashMapOf(token to Pair(amount, amount * (apy / 100)))
+        store[user.name]?.put(token, Pair(compoundAmount, compoundAmount * (apy / 100)))
 
-        // Subtract amount from wallet
+        // Get the amount that should be the subtracted amount from the user wallet
         val remaining = user.wallet[token]?.minus(amount)
 
-        // Replace the token value with the updated remaining
+        // Replace the token value in the user's wallet with the updated remaining of token
         UserSession.updateWalletFunds(token, remaining)
 
         """
@@ -58,6 +69,7 @@ class StakingStore {
         """.trimIndent().print()
     }
 
+    // Calculates the rewards depending on the months
     private fun calculateReward(amount: Double, apy: Double, months: Int = 12): Double {
         return (amount * (apy / 100) / 12) * months
     }
