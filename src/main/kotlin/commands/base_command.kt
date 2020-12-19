@@ -14,9 +14,9 @@ class CommandProcessor {
             queue.add(stakingCommand)
         }
 
-    fun processCommands(): CommandProcessor =
+    fun processCommand(): CommandProcessor =
         apply {
-            queue.forEach { it.execute() }
-            queue.clear()
+            queue.first().execute()
+            queue.removeFirst()
         }
 }

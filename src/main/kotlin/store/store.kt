@@ -97,10 +97,17 @@ class StakingStore {
 
         // Add the claimed rewards to the user's wallet for that token
         UserSession.replaceWalletFunds(token, walletFund + rewardsAmount)
+
+        """
+            ------------------------------------------------------------
+            User: ${user.name}
+                Claimed $rewardsAmount in ${token.toSimpleName()}
+            ------------------------------------------------------------
+        """.trimIndent().print()
     }
 
     // Returns true if user has rewards in a token
-    private fun User.hasRewards(token: TokenType) = store[this.name]!![token]!!.second >= 0
+    private fun User.hasRewards(token: TokenType) = store[this.name]?.get(token)?.second!! >= 0
 }
 
 // Facade

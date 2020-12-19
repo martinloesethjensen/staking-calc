@@ -1,11 +1,10 @@
 import commands.CommandProcessor
-import commands.StakingAddCommand
+import commands.StakingAddFundsCommand
+import commands.StakingClaimRewardCommand
 import factories.ProtocolFactory
 import models.TokenType
-import models.User
 import store.StakingRepository
 import utils.*
-import kotlin.system.exitProcess
 
 enum class MenuItem {
     STAKE, CLAIM, QUIT
@@ -34,6 +33,11 @@ fun main() {
         "3" -> charlie
         else -> alice
     }
+
+    stakingRepository.stake(alice, TokenType.DOT, 10.0)
+    stakingRepository.stake(alice, TokenType.DOT, 10.0)
+    stakingRepository.stake(alice, TokenType.KSM, 1.0)
+    stakingRepository.stake(alice, TokenType.ETH, 2.0)
 
     UserSession.login(user)
 
@@ -73,7 +77,7 @@ fun main() {
         // Return if null or NaN
         if (amountIn == null || (amountIn.isNaN() && amountIn <= 0.0)) return
 
-        commandProcessor.addToQueue(StakingAddCommand(user, stakeIn, amountIn))
+        commandProcessor.addToQueue(StakingAddFundsCommand(user, stakeIn, amountIn, stakingRepository)).processCommand()
 
         print("Want to stake more assets? y/n: ")
         val input = readLine()
@@ -83,7 +87,13 @@ fun main() {
     }
 
     while (menuItem == MenuItem.CLAIM && !claimFinished) {
-        TODO("Finish claim/redeem rewards functionality")
+        print("Input a token you'd like to claim: ")
+        val claimIn = readLine()?.toTokenType()!!
+
+        // Early return --> we don't want to proceed as token is unknown to us
+        if (claimIn.isNullOrUnknown()) return
+
+        commandProcessor.addToQueue(StakingClaimRewardCommand(user, claimIn, stakingRepository)).processCommand()
 
         print("Want to claim more rewards? y/n: ")
         val input = readLine()
@@ -91,9 +101,6 @@ fun main() {
         // Finish loop if user does not want to claim anymore rewards
         if (!input.shouldContinue()) claimFinished = true
     }
-
-    // Process commands
-    commandProcessor.processCommands()
 
     UserSession.logout()
 }
