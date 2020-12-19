@@ -1,7 +1,6 @@
 package store
 
-import alice
-import factory.ProtocolFactory
+import UserSession
 import factory.TokenType
 import models.*
 import utils.*
@@ -16,7 +15,7 @@ class StakingStore {
 
     fun authenticate(user: User) = userStore.contains(user.name)
 
-    fun addFundsToStake(user: User, token: TokenType, amount: Amount): WalletItem {
+    fun addFundsToStake(user: User, token: TokenType, amount: Amount) {
         if (amount.isNaN()) throw NumberFormatException()
 
         // Check if the user has the token that the user wants to stake
@@ -40,17 +39,27 @@ class StakingStore {
         // Put in store
         store[user.name] = hashMapOf(token to Pair(amount, amount * (apy / 100)))
 
-        // Return the updates wallet value
-        // TODO: fix subtraction and update of user wallet
-//        user.wallet[token].put(user.wallet[token]?.minus(amount))
+        // Subtract amount from wallet
+        val remaining = user.wallet[token]?.minus(amount)
+
+        // Replace the token value with the updated remaining
+        UserSession.updateWalletFunds(token, remaining)
 
         """
+            ------------------------------------------------------------
             User: ${user.name}
-            Staked $amount in ${token.toSimpleName()} with $apy
+                Staked $amount in ${token.toSimpleName()} with $apy% APY
+                Estimated rewards:
+                    1 month  = ${calculateReward(amount, apy, 1)}
+                    6 months = ${calculateReward(amount, apy, 6)}
+                    1 year   = ${calculateReward(amount, apy)}
+                    3 years  = ${calculateReward(amount, apy, 36)} 
+            ------------------------------------------------------------
         """.trimIndent().print()
+    }
 
-        // Return the updates wallet value
-        return user.wallet.filter { it.key == token }
+    private fun calculateReward(amount: Double, apy: Double, months: Int = 12): Double {
+        return (amount * (apy / 100) / 12) * months
     }
 
     // TODO:
@@ -80,9 +89,10 @@ class StakingStore {
 class StakingRepository {
     private val store = StakingStore()
 
-    fun stake(user: User, token: TokenType, amount: Double): WalletItem {
+    fun stake(user: User, token: TokenType, amount: Double) {
         if (store.authenticate(user)) {
-            return store.addFundsToStake(user, token, amount)
+            store.addFundsToStake(user, token, amount)
+            store.commit()
         } else throw NonExistingUser("User does not exist")
     }
 
