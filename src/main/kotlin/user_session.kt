@@ -37,6 +37,6 @@ object UserSession {
         this.user = null
     }
 
-    fun updateWalletFunds(tokenType: TokenType, value: Double?) =
+    fun replaceWalletFunds(tokenType: TokenType, value: Double?) =
         value?.let { user?.wallet?.replace(tokenType, it) }
 }

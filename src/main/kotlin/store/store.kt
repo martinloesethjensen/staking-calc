@@ -58,7 +58,7 @@ class StakingStore {
         val remaining = user.wallet[token]?.minus(amount)
 
         // Replace the token value in the user's wallet with the updated remaining of token
-        UserSession.updateWalletFunds(token, remaining)
+        UserSession.replaceWalletFunds(token, remaining)
 
         """
             ------------------------------------------------------------
@@ -78,7 +78,6 @@ class StakingStore {
         return (amount * (apy / 100) / 12) * months
     }
 
-    // TODO:
     // Adds rewards to user's wallet
     fun claimRewards(user: User, token: TokenType) {
         if (!user.authenticate()) throw NonExistingUser("User does not exist")
@@ -89,15 +88,15 @@ class StakingStore {
         // .first is the staked amount
         // .second is the rewards to claim
         val stakedAmount = store[user.name]?.get(token)?.first as Double
-        val rewardsAmount = store[user.name]?.get(token)?.second
+        val rewardsAmount = store[user.name]?.get(token)?.second as Double
 
         // Update store rewards for the user in a token that is staked
         store[user.name]?.put(token, Pair(stakedAmount, 0.0))
 
-        // Add the claimed rewards to the user's wallet for that token
-        UserSession.updateWalletFunds(token, rewardsAmount)
+        val walletFund = UserSession.user?.wallet?.get(token) as Double
 
-        println(store)
+        // Add the claimed rewards to the user's wallet for that token
+        UserSession.replaceWalletFunds(token, walletFund + rewardsAmount)
     }
 
     // Returns true if user has rewards in a token

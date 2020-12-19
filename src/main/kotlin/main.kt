@@ -37,8 +37,6 @@ fun main() {
 
     UserSession.login(user)
 
-    stakingRepository.claimRewards(user, TokenType.DOT)
-
     """
         |-------------------------------
         |User: ${user.name}
