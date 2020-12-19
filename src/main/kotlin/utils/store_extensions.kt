@@ -1,7 +1,7 @@
 package utils
 
-import factory.TokenType
 import models.Amount
+import models.TokenType
 import models.User
 
 // Returns true if user has that token in their wallet

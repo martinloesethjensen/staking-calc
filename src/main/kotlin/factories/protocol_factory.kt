@@ -1,16 +1,9 @@
-package factory
+package factories
 
 import models.Protocol
 import models.Token
+import models.TokenType
 
-sealed class TokenType {
-    object DOT : TokenType()
-    object KSM : TokenType()
-    object ETH : TokenType()
-    object UNKNOWN : TokenType()
-}
-
-// Factory
 object ProtocolFactory {
     fun protocolFromToken(tokenType: TokenType): Protocol = when (tokenType) {
         TokenType.DOT -> Protocol("Polkadot", Token("DOT", 5.0))

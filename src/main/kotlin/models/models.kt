@@ -1,11 +1,16 @@
 package models
 
-import factory.TokenType
-
 typealias Price = Double
 typealias Amount = Double
 typealias RewardAmount = Double
 typealias WalletItem = Map<TokenType, Amount>
+
+sealed class TokenType {
+    object DOT : TokenType()
+    object KSM : TokenType()
+    object ETH : TokenType()
+    object UNKNOWN : TokenType()
+}
 
 data class User(val name: String, var wallet: HashMap<TokenType, Amount> = hashMapOf())
 

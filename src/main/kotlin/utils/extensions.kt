@@ -1,6 +1,7 @@
 package utils
 
-import factory.TokenType
+import models.TokenType
+
 
 fun String.toTokenType(): TokenType = when (this.toUpperCase()) {
     TokenType.DOT.toSimpleName() -> TokenType.DOT

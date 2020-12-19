@@ -1,28 +1,6 @@
-import factory.TokenType
-import models.User
+import commands.CommandProcessor
+import models.TokenType
 import store.StakingRepository
-
-val alice = User(
-    "Alice", wallet = hashMapOf(
-        TokenType.KSM to 5.0,
-        TokenType.DOT to 75.0,
-        TokenType.ETH to 3.0
-    )
-)
-val bob = User(
-    "Bob", wallet = hashMapOf(
-        TokenType.KSM to 3.0,
-        TokenType.DOT to 25.0,
-        TokenType.ETH to 1.0
-    )
-)
-val charlie = User(
-    "Charlie", wallet = hashMapOf(
-        TokenType.KSM to 1.0,
-        TokenType.DOT to 150.0,
-        TokenType.ETH to 0.5
-    )
-)
 
 fun main() {
     val commandProcessor = CommandProcessor()

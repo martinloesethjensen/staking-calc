@@ -15,7 +15,7 @@ Then one more of own choice.
 
 ### Command Pattern
 
-The command pattern is a behavioral pattern.
+The commands pattern is a behavioral pattern.
 
 TODO: Write about this pattern and why it is good in this application
 
@@ -27,8 +27,8 @@ TODO: Write about this pattern and why it is good in this application
 
 ### Factory Method Pattern
 
-The factory method pattern is a creational pattern.
+The factories method pattern is a creational pattern.
 
 
 -----
-I also use singletons
+Singleton and Null Object patterns are also being used in this project 
