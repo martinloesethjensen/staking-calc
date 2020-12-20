@@ -15,13 +15,18 @@ Then one more of own choice.
 
 ### Command Pattern
 
-The command pattern is a behavioral pattern.
+The Command Pattern is a Behavioral Pattern.
 
-TODO: Write about this pattern and why it is good in this application
+With the Command Pattern, we can encapsulate a request as an object and decouple the request from its invoker.
+We use this code in our staking_command.kt file, where we have requests for both staking and claiming tokens and we have the implementation of the command processor in
+base_command where "addToQueue" and "processCommands" live, both methods for adding to the command queue and processing one or multiple commands.
+
+Command is good for our application, because of the decoupling and encapsulation it provides, where some of our most important functionality lives, is invaluable.
+Ironically, the Command Pattern is also known as "Transaction", which fits perfectly with the usage it has to handle this transaction functionality in our program.
 
 ### Facade Pattern
 
-The facade pattern is a structural pattern.
+The Facade Pattern is a Structural Pattern.
 
 With a facade we can keep complexity from the client, so that the client calling the code won't know of any subsystems that might exist.
 
@@ -37,7 +42,11 @@ Then another subsystem would be made and there would either be made another "rep
 
 ### Factory Method Pattern
 
-The factories method pattern is a creational pattern.
+The Factory Method Pattern is a Creational Pattern.
+
+By using the Factory Method Pattern we can decouple choice of instantiation to subclases, in this case we use a when conditional inside of protocol_factory.kt and apy_factory.kt.
+Our reasoning is that it is simple enough for our relatively easy choices, as they are nothing too complex our vary wildly from each other. If that was the case, perhaps Builder would have been a better choice.
+In the code it is used to select and instantiate a protocol object and/or APY digit, based on the tokenType input.
 
 
 -----
