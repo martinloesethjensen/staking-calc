@@ -4,6 +4,7 @@ import factories.ProtocolFactory
 import models.TokenType
 import models.User
 import store.StakingRepository
+import utils.print
 
 class StakingAddFundsCommand(
     private val user: User,
@@ -14,8 +15,11 @@ class StakingAddFundsCommand(
     override fun execute() {
         val protocol = ProtocolFactory.protocolFromToken(tokenType)
         val token = protocol.token
-        println("Staking ${protocol.name} (${token.id}) with amount: $amount")
-        println("Current price for 1 ${token.id} is $${token.price}")
+        """
+            |------------------------------------------------------------
+            |Staking ${protocol.name} (${token.id}) with amount: $amount
+            |Current price for 1 ${token.id} is ${'$'}${token.price}
+        """.trimMargin().print()
         stakingRepository.stake(user, tokenType, amount)
     }
 }

@@ -14,9 +14,16 @@ class CommandProcessor {
             queue.add(stakingCommand)
         }
 
+    // Process multiple commands and clear the queue
+    fun processCommands(): CommandProcessor =
+        apply {
+            queue.forEach { it.execute() }
+            queue.clear()
+        }
+
     fun processCommand(): CommandProcessor =
         apply {
-            queue.first().execute()
-            queue.removeFirst()
+            queue.last().execute()
+            queue.removeLast()
         }
 }

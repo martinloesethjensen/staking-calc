@@ -17,6 +17,33 @@ fun main() {
     var claimFinished = false
 
     """
+        |  ___________________________
+        | /                           \
+        ||     START OF POPULATION     |
+        | \___________________________/
+    """.trimMargin().print()
+    // Populate with some staked funds for the store
+    commandProcessor
+        .addToQueue(StakingAddFundsCommand(alice, TokenType.DOT, 10.0, stakingRepository))
+        .addToQueue(StakingAddFundsCommand(alice, TokenType.DOT, 10.0, stakingRepository))
+        .addToQueue(StakingAddFundsCommand(alice, TokenType.KSM, 1.0, stakingRepository))
+        .addToQueue(StakingAddFundsCommand(alice, TokenType.ETH, 2.0, stakingRepository))
+        .addToQueue(StakingAddFundsCommand(bob, TokenType.KSM, 1.0, stakingRepository))
+        .addToQueue(StakingAddFundsCommand(bob, TokenType.ETH, 0.5, stakingRepository))
+        .addToQueue(StakingAddFundsCommand(bob, TokenType.DOT, 5.0, stakingRepository))
+        .addToQueue(StakingAddFundsCommand(charlie, TokenType.DOT, 100.0, stakingRepository))
+        .addToQueue(StakingAddFundsCommand(charlie, TokenType.KSM, 0.2, stakingRepository))
+        .addToQueue(StakingAddFundsCommand(charlie, TokenType.ETH, 0.5, stakingRepository))
+        .processCommands()
+
+    """
+        |  ___________________________
+        | /                           \
+        ||      END OF POPULATION      |
+        | \___________________________/
+    """.trimMargin().print()
+
+    """
         |-------------------------------
         |Available users 
         |Enter one of the options below:
@@ -34,11 +61,7 @@ fun main() {
         else -> alice
     }
 
-    stakingRepository.stake(alice, TokenType.DOT, 10.0)
-    stakingRepository.stake(alice, TokenType.DOT, 10.0)
-    stakingRepository.stake(alice, TokenType.KSM, 1.0)
-    stakingRepository.stake(alice, TokenType.ETH, 2.0)
-
+    // We need to login with a user so that user can be access globally
     UserSession.login(user)
 
     """
@@ -101,6 +124,8 @@ fun main() {
         // Finish loop if user does not want to claim anymore rewards
         if (!input.shouldContinue()) claimFinished = true
     }
+
+    commandProcessor.processCommands()
 
     UserSession.logout()
 }
