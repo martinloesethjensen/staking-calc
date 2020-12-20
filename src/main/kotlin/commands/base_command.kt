@@ -21,7 +21,6 @@ class CommandProcessor {
             queue.clear()
         }
 
-
     fun processCommand(): CommandProcessor =
         apply {
             queue.last().execute()

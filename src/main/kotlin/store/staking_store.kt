@@ -4,7 +4,6 @@ import UserSession
 import alice
 import bob
 import charlie
-import factories.APYFactory
 import models.*
 import utils.*
 
@@ -16,7 +15,7 @@ class StakingStore {
     // Imitate a user base for the "authentication"
     private val userStore = mutableListOf(alice, bob, charlie)
 
-    fun User.authenticate() = userStore.contains(this)
+    private fun User.authenticate() = userStore.contains(this)
 
     fun addFundsToStake(user: User, token: TokenType, amount: Amount) {
         if (!user.authenticate()) throw NonExistingUser("User does not exist")
@@ -30,14 +29,13 @@ class StakingStore {
         if (!user.hasFunds(token, amount))
             throw InsufficientFunds(
                 "User has ${user.fundsFromToken(token)} in funds, " +
-                        "but amount was: $amount"
+                    "but amount was: $amount"
             )
 
         if (token.isNullOrUnknown()) throw UnknownToken("Token is unknown!")
 
-
-        // Using factory to get APY for a token
-        val apy = APYFactory.apyFromToken(token)
+        // Get APY for a token
+        val apy = token.apy()
 
         // This will populate user and user's tokens if they are not present in the store.
         // It provides default values that can be used for compounding interest
